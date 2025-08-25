@@ -264,7 +264,6 @@ impl LanguageModelProvider for OpenRouterLanguageModelProvider {
     }
 
     fn provided_models(&self, cx: &App) -> Vec<Arc<dyn LanguageModel>> {
-        let mut models_from_api = self.state.read(cx).available_models.clone();
         let mut settings_models = Vec::new();
 
         for model in &AllLanguageModelSettings::get_global(cx)
@@ -281,18 +280,7 @@ impl LanguageModelProvider for OpenRouterLanguageModelProvider {
             });
         }
 
-        for settings_model in &settings_models {
-            if let Some(pos) = models_from_api
-                .iter()
-                .position(|m| m.name == settings_model.name)
-            {
-                models_from_api[pos] = settings_model.clone();
-            } else {
-                models_from_api.push(settings_model.clone());
-            }
-        }
-
-        models_from_api
+        settings_models
             .into_iter()
             .map(|model| self.create_language_model(model))
             .collect()
